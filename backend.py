@@ -12,6 +12,11 @@ from dotenv import load_dotenv
 
 # Load API keys
 load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()  # Load .env file
+
+API_KEY = os.getenv("OPENROUTER_API_KEY")
+
 
 from fastapi import FastAPI
 from dotenv import load_dotenv
