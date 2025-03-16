@@ -9,14 +9,13 @@ import json
 import asyncio
 import concurrent.futures
 from dotenv import load_dotenv
-OPENROUTER_API_KEY = "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"
 
 # Load API keys
 load_dotenv()
 from dotenv import load_dotenv
 load_dotenv()  # Load .env file
 
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 
 from fastapi import FastAPI
