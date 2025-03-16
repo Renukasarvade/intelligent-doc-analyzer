@@ -13,6 +13,10 @@ from dotenv import load_dotenv
 # Load API keys
 load_dotenv()
 
+@app.get("/")
+def home():
+    return {"message": "API is running!"}
+
 app = FastAPI()
 
 # OpenRouter API Configuration
