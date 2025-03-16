@@ -1,37 +1,25 @@
-from fastapi import FastAPI, File, UploadFile, Form, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.responses import JSONResponse
 from openai import OpenAI
 import pdfplumber
 import docx
 import io
-import os
+import re
 import json
-import asyncio
-import concurrent.futures
+import os
 from dotenv import load_dotenv
 
-
-# Load environment variables (if needed)
 load_dotenv()
-
-
-
-# Root endpoint for health check
-@app.get("/")
-def read_root():
-    return {"message": "API is running!"}
-
-# (Include your other endpoints and logic below)
-
 
 app = FastAPI()
 
-# OpenRouter API Configuration
+# ======================
+# Configuration
+# ======================
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-if not OPENROUTER_API_KEY:
-    raise ValueError("🚨 API Key is missing! Please check your .env file.")
-
 MODEL_NAME = "meta-llama/llama-3.3-70b-instruct:free"
+
+# Initialize OpenRouter client
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=OPENROUTER_API_KEY,
