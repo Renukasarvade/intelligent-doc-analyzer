@@ -10,23 +10,11 @@ import asyncio
 import concurrent.futures
 from dotenv import load_dotenv
 
-# Load API keys
-load_dotenv()
-from dotenv import load_dotenv
-load_dotenv()  # Load .env file
-
-API_KEY = os.getenv("OPENROUTER_API_KEY")
-
-
-from fastapi import FastAPI
-from dotenv import load_dotenv
-import os
 
 # Load environment variables (if needed)
 load_dotenv()
 
-# Define your FastAPI app
-app = FastAPI()
+
 
 # Root endpoint for health check
 @app.get("/")
