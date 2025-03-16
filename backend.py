@@ -13,9 +13,23 @@ from dotenv import load_dotenv
 # Load API keys
 load_dotenv()
 
+from fastapi import FastAPI
+from dotenv import load_dotenv
+import os
+
+# Load environment variables (if needed)
+load_dotenv()
+
+# Define your FastAPI app
+app = FastAPI()
+
+# Root endpoint for health check
 @app.get("/")
-def home():
+def read_root():
     return {"message": "API is running!"}
+
+# (Include your other endpoints and logic below)
+
 
 app = FastAPI()
 
