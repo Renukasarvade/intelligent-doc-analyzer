@@ -3,4 +3,4 @@ services:
 name: github-dashboard
 env: python
 buildCommands: pip install -r requirements.txt
-starCommand: streamlit run dashboard.py --server.port $PORT --server.headless true
+starCommand: streamlit run fronted.py --server.port $PORT --server.headless true
