@@ -21,7 +21,10 @@ st.set_page_config(page_title="AI-Powered Document Analyzer", layout="wide")
 st.title("📄 Intelligent Document Processing System")
 st.write("Upload a document (PDF, DOCX, TXT) for automated analysis.")
 
-BACKEND_URL = "http://localhost:8000"
+BACKEND_URL = "https://intelligent-doc-analyzer-3.onrender.com"
+
+
+
 
 # ========================
 # UPLOAD SECTION
