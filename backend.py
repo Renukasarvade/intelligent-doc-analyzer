@@ -130,6 +130,11 @@ async def compare_docs(text1: str = Form(...), text2: str = Form(...)):
 
 
 
+
+
+    import os
+
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 10000))  # Use the assigned PORT or default to 10000
+    import uvicorn
+    port = int(os.getenv("PORT", 8000))  # Use environment variable or fallback to 8000
     uvicorn.run(app, host="0.0.0.0", port=port)
