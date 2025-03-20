@@ -10,7 +10,7 @@ import asyncio
 import concurrent.futures
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load API keys
 load_dotenv()
 
 app = FastAPI()
@@ -26,48 +26,62 @@ client = OpenAI(
     api_key=OPENROUTER_API_KEY,
 )
 
-# Text extraction functions (unchanged)
+# ==========================
+# PARALLEL TEXT EXTRACTION
+# ==========================
 def extract_text_from_pdf(content: bytes) -> str:
+    """Extract text from a PDF file using parallel processing."""
     with pdfplumber.open(io.BytesIO(content)) as pdf:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             texts = list(executor.map(lambda page: page.extract_text() or "", pdf.pages))
     return "\n".join(texts).strip() or "No text extracted from PDF."
 
 def extract_text_from_docx(content: bytes) -> str:
+    """Extract text from a DOCX file."""
     doc = docx.Document(io.BytesIO(content))
     return "\n".join(para.text for para in doc.paragraphs).strip()
 
 def extract_text_from_txt(content: bytes) -> str:
+    """Extract text from a TXT file."""
     return content.decode("utf-8", errors="ignore").strip()
 
 def extract_text(file: UploadFile) -> str:
+    """Detect file type and extract text efficiently."""
     content = file.file.read()
+    
     if file.content_type == "application/pdf":
         return extract_text_from_pdf(content)
     elif file.content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
         return extract_text_from_docx(content)
     elif file.content_type == "text/plain":
         return extract_text_from_txt(content)
+    
     return "Unsupported file type"
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     loop = asyncio.get_event_loop()
     text = await loop.run_in_executor(None, extract_text, file)
+
     if text.startswith("Error") or text == "Unsupported file type":
         raise HTTPException(status_code=400, detail=text)
+
     return JSONResponse({"filename": file.filename, "text": text, "length": len(text)})
 
-# AI-powered analysis functions (unchanged)
+# ==========================
+# AI-POWERED ANALYSIS
+# ==========================
 def query_llama(prompt: str, text: str) -> str:
+    """Query Llama model with document text while handling large inputs."""
     if not text.strip():
         return "Error: No content to process."
+
     try:
         completion = client.chat.completions.create(
             model=MODEL_NAME,
             messages=[
                 {"role": "system", "content": "You are an expert in document analysis."},
-                {"role": "user", "content": f"{prompt}\n\nDocument Text:\n{text[:25000]}"}
+                {"role": "user", "content": f"{prompt}\n\nDocument Text:\n{text[:25000]}"}  # Large input handling
             ]
         )
         return completion.choices[0].message.content.strip()
@@ -80,13 +94,17 @@ async def summarize(text: str = Form(...)):
 
 @app.post("/analyze/entities")
 async def recognize_entities(text: str = Form(...)):
+    """Extract named entities (PERSON, ORG, GEO, DATE) and return JSON format."""
+    
     prompt = (
         "Extract named entities from the given text. "
         "Categorize them as PERSON, ORGANIZATION (ORG), GEOGRAPHICAL LOCATION (GEO), and DATE. "
         "Return results ONLY in JSON format:\n"
         '[{"entity": "Elon Musk", "type": "PERSON"}, {"entity": "OpenAI", "type": "ORG"}].'
     )
+
     response = query_llama(prompt, text)
+
     try:
         json_start = response.find("[")
         json_end = response.rfind("]") + 1
