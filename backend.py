@@ -10,75 +10,52 @@ import asyncio
 import concurrent.futures
 from dotenv import load_dotenv
 
-# Load API keys
+# Load API Key from Environment Variables
 load_dotenv()
-from dotenv import load_dotenv
-load_dotenv()  # Load .env file
-
 API_KEY = os.getenv("OPENROUTER_API_KEY")
 
+if not API_KEY:
+    raise ValueError("🚨 API Key is missing! Please set it in Render Environment Variables.")
 
-from fastapi import FastAPI
-from dotenv import load_dotenv
-import os
-
-# Load environment variables (if needed)
-load_dotenv()
-
-# Define your FastAPI app
+# Define FastAPI app
 app = FastAPI()
 
-# Root endpoint for health check
+# Health check endpoint
 @app.get("/")
 def read_root():
     return {"message": "API is running!"}
 
-# (Include your other endpoints and logic below)
-
-
-app = FastAPI()
-
 # OpenRouter API Configuration
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-if not OPENROUTER_API_KEY:
-    raise ValueError("🚨 API Key is missing! Please check your .env file.")
-
 MODEL_NAME = "meta-llama/llama-3.3-70b-instruct:free"
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
-    api_key=OPENROUTER_API_KEY,
+    api_key=API_KEY,
 )
 
 # ==========================
 # PARALLEL TEXT EXTRACTION
 # ==========================
 def extract_text_from_pdf(content: bytes) -> str:
-    """Extract text from a PDF file using parallel processing."""
     with pdfplumber.open(io.BytesIO(content)) as pdf:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             texts = list(executor.map(lambda page: page.extract_text() or "", pdf.pages))
     return "\n".join(texts).strip() or "No text extracted from PDF."
 
 def extract_text_from_docx(content: bytes) -> str:
-    """Extract text from a DOCX file."""
     doc = docx.Document(io.BytesIO(content))
     return "\n".join(para.text for para in doc.paragraphs).strip()
 
 def extract_text_from_txt(content: bytes) -> str:
-    """Extract text from a TXT file."""
     return content.decode("utf-8", errors="ignore").strip()
 
 def extract_text(file: UploadFile) -> str:
-    """Detect file type and extract text efficiently."""
     content = file.file.read()
-    
     if file.content_type == "application/pdf":
         return extract_text_from_pdf(content)
     elif file.content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
         return extract_text_from_docx(content)
     elif file.content_type == "text/plain":
         return extract_text_from_txt(content)
-    
     return "Unsupported file type"
 
 @app.post("/upload")
@@ -95,7 +72,6 @@ async def upload_file(file: UploadFile = File(...)):
 # AI-POWERED ANALYSIS
 # ==========================
 def query_llama(prompt: str, text: str) -> str:
-    """Query Llama model with document text while handling large inputs."""
     if not text.strip():
         return "Error: No content to process."
 
@@ -104,7 +80,7 @@ def query_llama(prompt: str, text: str) -> str:
             model=MODEL_NAME,
             messages=[
                 {"role": "system", "content": "You are an expert in document analysis."},
-                {"role": "user", "content": f"{prompt}\n\nDocument Text:\n{text[:25000]}"}  # Large input handling
+                {"role": "user", "content": f"{prompt}\n\nDocument Text:\n{text[:25000]}"}
             ]
         )
         return completion.choices[0].message.content.strip()
@@ -117,15 +93,12 @@ async def summarize(text: str = Form(...)):
 
 @app.post("/analyze/entities")
 async def recognize_entities(text: str = Form(...)):
-    """Extract named entities (PERSON, ORG, GEO, DATE) and return JSON format."""
-    
     prompt = (
         "Extract named entities from the given text. "
         "Categorize them as PERSON, ORGANIZATION (ORG), GEOGRAPHICAL LOCATION (GEO), and DATE. "
         "Return results ONLY in JSON format:\n"
         '[{"entity": "Elon Musk", "type": "PERSON"}, {"entity": "OpenAI", "type": "ORG"}].'
     )
-
     response = query_llama(prompt, text)
 
     try:
@@ -149,7 +122,10 @@ async def qa(text: str = Form(...), question: str = Form(...)):
 async def compare_docs(text1: str = Form(...), text2: str = Form(...)):
     return JSONResponse({"comparison": query_llama("Compare these two documents.", f"Doc1:\n{text1}\n\nDoc2:\n{text2}")})
 
+# ==========================
+# RENDER FIX: DYNAMIC PORT
+# ==========================
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-
+    port = int(os.environ.get("PORT", 10000))  # Use Render's assigned port
+    uvicorn.run(app, host="0.0.0.0", port=port)
