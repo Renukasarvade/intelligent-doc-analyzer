@@ -7,32 +7,22 @@ python-dotenv==1.0.1
 fastapi==0.115.11
 uvicorn==0.34.0
 pydantic==2.10.6
-pydantic-settings==2.8.1
 starlette==0.46.1
 
 # AI & NLP
 openai==1.66.3
 langchain==0.3.20
-langchain-core==0.3.44
-langchain-text-splitters==0.3.6
-sentence-transformers==3.4.1
 transformers==4.49.0
+sentence-transformers==3.4.1
 
 # File Handling & PDF Processing
 pdfplumber==0.11.5
-pdfminer.six==20231228
-PyPDF2==3.0.1
-docx2txt==0.8
 python-docx==1.1.2
-pillow==11.1.0
-pytesseract==0.3.13
+PyPDF2==3.0.1
 
-# Utilities & JSON Handling
-fastapi==0.115.11
+# Utilities
 jsonschema==4.23.0
-jsonschema-specifications==2024.10.1
 cryptography==44.0.2
 
-# Database & Misc
+# Database (Optional, if needed)
 SQLAlchemy==2.0.39
-networkx==3.4.2

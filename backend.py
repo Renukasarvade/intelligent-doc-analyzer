@@ -10,31 +10,23 @@ import asyncio
 import concurrent.futures
 from dotenv import load_dotenv
 
-# Load API Key from Environment Variables
+# Load environment variables
 load_dotenv()
-API_KEY = os.getenv("OPENROUTER_API_KEY")
 
-if not API_KEY:
-    raise ValueError("🚨 API Key is missing! Please set it in Render Environment Variables.")
-
-# Define FastAPI app
 app = FastAPI()
 
-# Health check endpoint
-@app.get("/")
-def read_root():
-    return {"message": "API is running!"}
-
 # OpenRouter API Configuration
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+if not OPENROUTER_API_KEY:
+    raise ValueError("🚨 API Key is missing! Please check your .env file.")
+
 MODEL_NAME = "meta-llama/llama-3.3-70b-instruct:free"
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
-    api_key=API_KEY,
+    api_key=OPENROUTER_API_KEY,
 )
 
-# ==========================
-# PARALLEL TEXT EXTRACTION
-# ==========================
+# Text extraction functions (unchanged)
 def extract_text_from_pdf(content: bytes) -> str:
     with pdfplumber.open(io.BytesIO(content)) as pdf:
         with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -62,19 +54,14 @@ def extract_text(file: UploadFile) -> str:
 async def upload_file(file: UploadFile = File(...)):
     loop = asyncio.get_event_loop()
     text = await loop.run_in_executor(None, extract_text, file)
-
     if text.startswith("Error") or text == "Unsupported file type":
         raise HTTPException(status_code=400, detail=text)
-
     return JSONResponse({"filename": file.filename, "text": text, "length": len(text)})
 
-# ==========================
-# AI-POWERED ANALYSIS
-# ==========================
+# AI-powered analysis functions (unchanged)
 def query_llama(prompt: str, text: str) -> str:
     if not text.strip():
         return "Error: No content to process."
-
     try:
         completion = client.chat.completions.create(
             model=MODEL_NAME,
@@ -100,7 +87,6 @@ async def recognize_entities(text: str = Form(...)):
         '[{"entity": "Elon Musk", "type": "PERSON"}, {"entity": "OpenAI", "type": "ORG"}].'
     )
     response = query_llama(prompt, text)
-
     try:
         json_start = response.find("[")
         json_end = response.rfind("]") + 1
@@ -122,10 +108,6 @@ async def qa(text: str = Form(...), question: str = Form(...)):
 async def compare_docs(text1: str = Form(...), text2: str = Form(...)):
     return JSONResponse({"comparison": query_llama("Compare these two documents.", f"Doc1:\n{text1}\n\nDoc2:\n{text2}")})
 
-# ==========================
-# RENDER FIX: DYNAMIC PORT
-# ==========================
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.environ.get("PORT", 10000))  # Use Render's assigned port
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
