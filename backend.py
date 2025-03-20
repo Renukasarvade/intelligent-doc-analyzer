@@ -128,10 +128,6 @@ async def compare_docs(text1: str = Form(...), text2: str = Form(...)):
     return JSONResponse({"comparison": query_llama("Compare these two documents.", f"Doc1:\n{text1}\n\nDoc2:\n{text2}")})
 
 
-
-
-
-
     import os
 
 if __name__ == "__main__":
