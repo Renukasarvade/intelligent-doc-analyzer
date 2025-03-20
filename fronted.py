@@ -26,6 +26,7 @@ BACKEND_URL = "https://intelligent-doc-analyzer-3.onrender.com"
 
 
 
+
 # ========================
 # UPLOAD SECTION
 # ========================
