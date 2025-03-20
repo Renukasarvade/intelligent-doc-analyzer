@@ -9,6 +9,7 @@ import json
 import asyncio
 import concurrent.futures
 from dotenv import load_dotenv
+import uvicorn
 
 # Load API keys
 load_dotenv()
@@ -126,6 +127,9 @@ async def qa(text: str = Form(...), question: str = Form(...)):
 async def compare_docs(text1: str = Form(...), text2: str = Form(...)):
     return JSONResponse({"comparison": query_llama("Compare these two documents.", f"Doc1:\n{text1}\n\nDoc2:\n{text2}")})
 
+
+
+
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.getenv("PORT", 10000))  # Use the assigned PORT or default to 10000
+    uvicorn.run(app, host="0.0.0.0", port=port)
