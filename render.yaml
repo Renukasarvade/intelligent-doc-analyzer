@@ -1,6 +1,9 @@
 services:
-- type: web
-name: github-dashboard
-env: python
-buildCommands: pip install -r requirements.txt
-starCommand: streamlit run fronted.py --server.port $PORT --server.headless true
+  - type: web
+    name: document-analyzer-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend:app --host 0.0.0.0 --port 8000
+    envVars:
+      - key: OPENROUTER_API_KEY
+        value: your_openrouter_api_key_here
