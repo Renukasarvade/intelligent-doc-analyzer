@@ -8,6 +8,26 @@ from dotenv import load_dotenv
 import os
 
 
+
+
+
+# import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Print API key to check if it's being loaded
+print("API_KEY:", os.getenv("API_KEY"))  
+
+# Use API key in your request
+api_key = os.getenv("API_KEY")
+
+if not api_key:
+    raise ValueError("🚨 API keys missing! Check your .env file.")
+
+
+
 # Start FastAPI backend
 def start_backend():
     subprocess.Popen(["uvicorn", "backend:app", "--host", "0.0.0.0", "--port", "8000"])
@@ -20,8 +40,7 @@ st.set_page_config(page_title="AI-Powered Document Analyzer", layout="wide")
 st.title("📄 Intelligent Document Processing System")
 st.write("Upload a document (PDF, DOCX, TXT) for automated analysis.")
 
-BACKEND_URL ="http://localhost:8000"
-
+BACKEND_URL = "http://localhost:8000"
 
 # ========================
 # UPLOAD SECTION
