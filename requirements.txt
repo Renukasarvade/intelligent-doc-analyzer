@@ -1,7 +1,6 @@
 # Streamlit (Frontend)
 streamlit==1.43.2
 requests==2.32.3
-python-dotenv==1.0.1
 
 # FastAPI (Backend)
 fastapi==0.115.11
@@ -20,9 +19,12 @@ pdfplumber==0.11.5
 python-docx==1.1.2
 PyPDF2==3.0.1
 
+# Environment Variables (Needed ONLY for Backend)
+python-dotenv==1.0.1  
+
 # Utilities
 jsonschema==4.23.0
 cryptography==44.0.2
 
 # Database (Optional, if needed)
-SQLAlchemy==2.0.39
+SQLAlchemy==2.0.39  
