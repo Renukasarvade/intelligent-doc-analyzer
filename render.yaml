@@ -1,9 +1,7 @@
 services:
   - type: web
-    name: document-analyzer-backend
+    name: intelligent-doc-analyzer-backend
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn backend:app --host 0.0.0.0 --port 8000
-    envVars:
-      - key: OPENROUTER_API_KEY
-        value: your_openrouter_api_key_here
+    startCommand: uvicorn backend:app --host 0.0.0.0 --port $PORT
+    autoDeploy: true
