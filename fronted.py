@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 import os
 
 
-
 # Start FastAPI backend
 def start_backend():
     subprocess.Popen(["uvicorn", "backend:app", "--host", "0.0.0.0", "--port", "8000"])
@@ -21,11 +20,7 @@ st.set_page_config(page_title="AI-Powered Document Analyzer", layout="wide")
 st.title("📄 Intelligent Document Processing System")
 st.write("Upload a document (PDF, DOCX, TXT) for automated analysis.")
 
-BACKEND_URL = "https://intelligent-doc-analyzer-3.onrender.com"
-
-
-
-
+BACKEND_URL = "http://localhost:8000"
 
 # ========================
 # UPLOAD SECTION
